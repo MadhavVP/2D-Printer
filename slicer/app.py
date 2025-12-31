@@ -15,12 +15,14 @@ class App(ctk.CTk):
 
         self.geometry("1000x720")
         self.path = ''
-        self.threshold = 150
-        self.ksize = 11
-        self.sigmaX = 5
-        self.gamma = 0.15
+        self.threshold = ctk.IntVar(value=150)
+        self.sobelksize = ctk.IntVar(value=5)
+        self.pencilksize = ctk.IntVar(value=11)
+        self.dgksize = ctk.IntVar(value=11)
+        self.gamma = ctk.DoubleVar(value=0.15)
         self.sobel = ctk.BooleanVar(value=False)
         self.pencil = ctk.BooleanVar(value=False)
+        self.divgamma = ctk.BooleanVar(value=False)
         
         self.canvas_width = 0
         self.canvas_height = 0
@@ -40,27 +42,46 @@ class App(ctk.CTk):
         self.path = path
         self.sobel.trace('w', lambda *_: self.reload_cv2_img())
         self.pencil.trace('w', lambda *_: self.reload_cv2_img())
+        self.divgamma.trace('w', lambda *_: self.reload_cv2_img())
+        self.threshold.trace('w', lambda *_: self.reload_cv2_img())
+        self.sobelksize.trace('w', lambda *_: self.reload_cv2_img())
+        self.pencilksize.trace('w', lambda *_: self.reload_cv2_img())
+        self.dgksize.trace('w', lambda *_: self.reload_cv2_img())
+        self.gamma.trace('w', lambda *_: self.reload_cv2_img())
+        self.menu = Menu(self, ['sobel', 'pencil', 'Divide w/ Gamma'], [self.sobel, self.pencil, self.divgamma], self.threshold, self.sobelksize,
+        self.pencilksize,
+        self.dgksize,
+        self.gamma)
         self.reload_cv2_img()
     
     def reload_cv2_img(self):
         self.cv2_img = cv2.imread(self.path)
         self.cv2_img = cv2.cvtColor(self.cv2_img, cv2.COLOR_BGR2GRAY)
         if self.sobel.get():
-            gx = cv2.Sobel(self.cv2_img, cv2.CV_64F, 1, 0, ksize=5)
-            gy = cv2.Sobel(self.cv2_img, cv2.CV_64F, 0, 1, ksize=5)
+            gx = cv2.Sobel(self.cv2_img, cv2.CV_64F, 1, 0, ksize=self.sobelksize.get())
+            gy = cv2.Sobel(self.cv2_img, cv2.CV_64F, 0, 1, ksize=self.sobelksize.get())
             self.cv2_img = cv2.magnitude(gx, gy)
         if self.pencil.get():
             neg = 255 - self.cv2_img
-            gblur = cv2.GaussianBlur(neg, (self.ksize,self.ksize), 0)
+            gblur = cv2.GaussianBlur(neg, (self.pencilksize.get(),self.pencilksize.get()), 0)
             neg_blur = 255 - gblur
-            sketch = cv2.divide(self.cv2_img, neg_blur, scale=256)
-            ret, thresh2 = cv2.threshold(sketch, self.threshold, 255, cv2.THRESH_BINARY)
-            self.cv2_img = thresh2
+            self.cv2_img = cv2.divide(self.cv2_img, neg_blur, scale=256)
+        if self.divgamma.get():
+            gblur = cv2.GaussianBlur(self.cv2_img, (self.dgksize.get(),self.dgksize.get()), 0)
+            div = cv2.divide(self.cv2_img, gblur, scale = 256)
+            self.cv2_img = self.adj_gamma(div, self.gamma.get())
+
+        ret, self.cv2_img = cv2.threshold(self.cv2_img, self.threshold.get(), 255, cv2.THRESH_BINARY)
         self.cv2_img = cv2.normalize(
                             self.cv2_img, None, 0, 255, cv2.NORM_MINMAX
                         ).astype(np.uint8)
         self.update_viewed_image()
 
+    def adj_gamma(seld, img, gamma=1):
+        invGamma = 1.0 / gamma
+        table = np.array([((i/255)**invGamma)*255 for i in np.arange(0,256)])
+        lut  = cv2.LUT(img.astype(np.uint8), table.astype(np.uint8))
+        return lut
 
     def update_viewed_image(self):
         self.image = Image.fromarray(self.cv2_img)
@@ -69,7 +90,6 @@ class App(ctk.CTk):
         self.image_import.grid_forget()
         self.image_output = ImgOut(self, self.resize_image)
         self.close_button = CloseOutput(self, self.close_edit)
-        self.menu = Menu(self, ['sobel', 'pencil'], [self.sobel, self.pencil])
         self.render_img()
     
     
