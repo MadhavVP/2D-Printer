@@ -15,6 +15,13 @@ class Checkbox(Panel):
         for i in range(0, len(textargs)):
             ctk.CTkCheckBox(self, text=textargs[i], variable=varargs[i]).grid(column=0, row=i, sticky='W', padx=5, pady=5)
 
+class FillIn(Panel):
+    def __init__(self, parent, text, var):
+        super().__init__(parent=parent)
+        self.rowconfigure((0,1), weight=1)
+        self.columnconfigure((0,1), weight=1)
+        ctk.CTkLabel(self, text=text).grid(column=0, row=0, sticky='W', padx=5)
+        ctk.CTkEntry(self, textvariable=var, placeholder_text=f'{int(var.get())}').grid(row=1, column=1, sticky='E', padx=5, pady=5)
 
 class Slider(Panel):
     def __init__(self, parent, text, var, min, max, double):

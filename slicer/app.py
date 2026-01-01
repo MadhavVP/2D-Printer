@@ -23,6 +23,11 @@ class App(ctk.CTk):
         self.sobel = ctk.BooleanVar(value=False)
         self.pencil = ctk.BooleanVar(value=False)
         self.divgamma = ctk.BooleanVar(value=False)
+        self.paperheight = ctk.IntVar(value= 279)
+        self.paperwidth = ctk.IntVar(value= 216)
+        self.rotation = ctk.DoubleVar(value= 0)
+        self.zoom = ctk.DoubleVar(value= 1)
+        
         
         self.canvas_width = 0
         self.canvas_height = 0
@@ -48,10 +53,14 @@ class App(ctk.CTk):
         self.pencilksize.trace('w', lambda *_: self.reload_cv2_img())
         self.dgksize.trace('w', lambda *_: self.reload_cv2_img())
         self.gamma.trace('w', lambda *_: self.reload_cv2_img())
-        self.menu = Menu(self, ['sobel', 'pencil', 'Divide w/ Gamma'], [self.sobel, self.pencil, self.divgamma], self.threshold, self.sobelksize,
+        self.rotation.trace('w', lambda *_: self.reload_cv2_img())
+        self.zoom.trace('w', lambda *_: self.reload_cv2_img())
+        self.menu = Menu(self, self.paperheight, self.paperwidth, ['sobel', 'pencil', 'Divide w/ Gamma'], [self.sobel, self.pencil, self.divgamma], self.threshold, self.sobelksize,
         self.pencilksize,
         self.dgksize,
-        self.gamma)
+        self.gamma,
+        self.rotation,
+        self.zoom)
         self.reload_cv2_img()
     
     def reload_cv2_img(self):
@@ -75,16 +84,41 @@ class App(ctk.CTk):
         self.cv2_img = cv2.normalize(
                             self.cv2_img, None, 0, 255, cv2.NORM_MINMAX
                         ).astype(np.uint8)
+        self.disp_img = self.paperize()
         self.update_viewed_image()
 
-    def adj_gamma(seld, img, gamma=1):
+    def paperize(self):
+        ph = self.paperheight.get()
+        pw = self.paperwidth.get()
+        paper = np.full((ph, pw), 255, dtype=np.uint8)
+
+        imgh, imgw = self.cv2_img.shape[:2]
+        
+        paper_center = (pw // 2, ph // 2)
+        img_center = (imgw // 2, imgh // 2)
+
+        rotate = cv2.getRotationMatrix2D(img_center, self.rotation.get(), self.zoom.get())
+
+        rotate[0, 2] += paper_center[0] - img_center[0]
+        rotate[1, 2] += paper_center[1] - img_center[1]
+
+        cv2.warpAffine(self.cv2_img, rotate, (pw, ph), dst=paper, flags=cv2.INTER_LINEAR, borderValue=255)
+        # resized = cv2.resize(self.cv2_img, (neww, newh), interpolation=cv2.INTER_AREA)
+
+        # x_off = (pw - neww) // 2
+        # y_off = (ph - newh) // 2
+
+        # paper[y_off:y_off+newh, x_off:x_off+neww] = resized
+        return paper
+
+    def adj_gamma(self, img, gamma=1):
         invGamma = 1.0 / gamma
         table = np.array([((i/255)**invGamma)*255 for i in np.arange(0,256)])
         lut  = cv2.LUT(img.astype(np.uint8), table.astype(np.uint8))
         return lut
 
     def update_viewed_image(self):
-        self.image = Image.fromarray(self.cv2_img)
+        self.image = Image.fromarray(self.disp_img)
         self.image_tk = ImageTk.PhotoImage(self.image)
         self.img_ratio = self.image.size[0] / self.image.size[1]
         self.image_import.grid_forget()
