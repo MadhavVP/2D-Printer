@@ -28,6 +28,7 @@ class App(ctk.CTk):
         self.rotation = ctk.DoubleVar(value= 0)
         self.zoom = ctk.DoubleVar(value= 1)
         
+        self.steprate = ctk.IntVar(value=10)
         
         self.canvas_width = 0
         self.canvas_height = 0
@@ -55,12 +56,15 @@ class App(ctk.CTk):
         self.gamma.trace('w', lambda *_: self.reload_cv2_img())
         self.rotation.trace('w', lambda *_: self.reload_cv2_img())
         self.zoom.trace('w', lambda *_: self.reload_cv2_img())
+        self.paperheight.trace('w', lambda *_: self.reload_cv2_img())
+        self.paperwidth.trace('w', lambda *_: self.reload_cv2_img())
         self.menu = Menu(self, self.paperheight, self.paperwidth, ['sobel', 'pencil', 'Divide w/ Gamma'], [self.sobel, self.pencil, self.divgamma], self.threshold, self.sobelksize,
         self.pencilksize,
         self.dgksize,
         self.gamma,
         self.rotation,
-        self.zoom)
+        self.zoom,
+        self.steprate)
         self.reload_cv2_img()
     
     def reload_cv2_img(self):

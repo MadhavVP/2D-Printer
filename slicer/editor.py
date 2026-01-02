@@ -4,7 +4,8 @@ class Menu(ctk.CTkTabview):
     def __init__(self, parent, paperh, paperw, preptext, prepvars, thresh, sobelksize,
         pencilksize,
         dgksize,
-        gamma, rotation, zoom):
+        gamma, rotation, zoom,
+        steprate):
         super().__init__(master=parent)
         self.grid(row=0, column=0, sticky='nsew')
 
@@ -16,7 +17,7 @@ class Menu(ctk.CTkTabview):
         pencilksize,
         dgksize,
         gamma, rotation, zoom)
-        SliceFrame(self.tab('Slice'))
+        SliceFrame(self.tab('Slice'), steprate)
         ExportFrame(self.tab('Export'))
 
 class PrepareFrame(ctk.CTkFrame):
@@ -40,9 +41,12 @@ class PrepareFrame(ctk.CTkFrame):
 
 
 class SliceFrame(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, steprate):
         super().__init__(master=parent, fg_color=TERTIARY)
         self.pack(expand=True, fill='both')
+
+        FillIn(self, 'Steps per mm', steprate)
+
 
 class ExportFrame(ctk.CTkFrame):
     def __init__(self, parent):
