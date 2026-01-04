@@ -29,6 +29,7 @@ class App(ctk.CTk):
         self.zoom = ctk.DoubleVar(value= 1)
         
         self.steprate = ctk.IntVar(value=10)
+        self.sliced = ctk.BooleanVar(value=False)
         
         self.canvas_width = 0
         self.canvas_height = 0
@@ -57,14 +58,15 @@ class App(ctk.CTk):
         self.rotation.trace('w', lambda *_: self.reload_cv2_img())
         self.zoom.trace('w', lambda *_: self.reload_cv2_img())
         self.paperheight.trace('w', lambda *_: self.reload_cv2_img())
-        self.paperwidth.trace('w', lambda *_: self.reload_cv2_img())
+        self.sliced.trace('w', lambda *_: self.reload_cv2_img())
         self.menu = Menu(self, self.paperheight, self.paperwidth, ['sobel', 'pencil', 'Divide w/ Gamma'], [self.sobel, self.pencil, self.divgamma], self.threshold, self.sobelksize,
         self.pencilksize,
         self.dgksize,
         self.gamma,
         self.rotation,
         self.zoom,
-        self.steprate)
+        self.steprate,
+        self.disp_sliced)
         self.reload_cv2_img()
     
     def reload_cv2_img(self):
@@ -114,6 +116,15 @@ class App(ctk.CTk):
 
         # paper[y_off:y_off+newh, x_off:x_off+neww] = resized
         return paper
+    
+    def disp_sliced(self):
+        self.reload_cv2_img()
+        heightsteps = self.paperheight.get() * self.steprate.get()
+        widthsteps = self.paperwidth.get() * self.steprate.get()
+        printingres = cv2.resize(self.disp_img, (widthsteps, heightsteps), interpolation=cv2.INTER_NEAREST)
+        _, self.disp_img = cv2.threshold(printingres, 127, 255, cv2.THRESH_BINARY)
+        self.update_viewed_image()
+
 
     def adj_gamma(self, img, gamma=1):
         invGamma = 1.0 / gamma
