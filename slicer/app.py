@@ -5,6 +5,7 @@ from editor import Menu
 from settings import *
 import cv2
 import numpy as np
+from tkinter import filedialog
 
 class App(ctk.CTk):
     def __init__(self):
@@ -66,7 +67,8 @@ class App(ctk.CTk):
         self.rotation,
         self.zoom,
         self.steprate,
-        self.disp_sliced)
+        self.disp_sliced,
+        self.export)
         self.reload_cv2_img()
     
     def reload_cv2_img(self):
@@ -124,6 +126,35 @@ class App(ctk.CTk):
         printingres = cv2.resize(self.disp_img, (widthsteps, heightsteps), interpolation=cv2.INTER_NEAREST)
         _, self.disp_img = cv2.threshold(printingres, 127, 255, cv2.THRESH_BINARY)
         self.update_viewed_image()
+
+    def export(self):
+        self.disp_sliced()
+
+        fp = filedialog.asksaveasfilename(
+            title="Save mcode as",
+            defaultextension=".mcode",
+            filetypes=[("MCODE", "*.mcode")],
+        )
+
+        if not fp:
+            return
+        
+        cur = 0
+        with open(fp, "w") as f:
+            height, width = self.disp_img.shape[:2] 
+            for i in range(height):
+                f.write(f"Z0\nX0Y{i}\n")
+                for j in range(width):
+                    if self.disp_img[i][j] == 255:
+                        if cur == 0:
+                            f.write(f"X{j}Y{i}\nZ1\n")
+                            cur = 1
+                    else:
+                        if cur == 0:
+                            f.write(f"X{j}Y{i}\nZ0\n")
+                            cur = 0
+                    if j == width - 1:
+                        f.write(f"X{j}Y{i}\n")
 
 
     def adj_gamma(self, img, gamma=1):
