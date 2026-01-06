@@ -8,7 +8,7 @@ def adj_gamma(img, gamma=1):
     return lut
 
 def main():
-    img = cv2.imread("grr3.jpg")
+    img = cv2.imread("slicer/grr3.jpg")
     if img is None:
         print("No image")
         return
@@ -21,11 +21,13 @@ def main():
     # cv2.imshow('sobely',sby)
     # cv2.imshow('laplacian',laplacian)
 
-    threshold = 130
-    ksize = 21
-    sigmaX = 9
-    gamma = 0.1
+    threshold = 150
+    ksize = 11
+    sigmaX = 5
+    gamma = 0.15
     gblur = cv2.GaussianBlur(img, (ksize, ksize), sigmaX)
+    # gblur = cv2.bilateralFilter(img, 9, 100, 75)
+    
     div = cv2.divide(img, gblur, scale = 256)
     sketch = adj_gamma(div, gamma)
     ret, thresh1 = cv2.threshold(sketch, threshold, 255, cv2.THRESH_BINARY)
@@ -36,13 +38,14 @@ def main():
 
     neg = 255 - img
     gblur = cv2.GaussianBlur(neg, (ksize,ksize), 0)
+    gblur = cv2.bilateralFilter(neg, 9, 75, 75)
     neg_blur = 255 - gblur
     sketch = cv2.divide(img, neg_blur, scale=256)
     ret, thresh2 = cv2.threshold(sketch, threshold, 255, cv2.THRESH_BINARY)
     ret, thresh_inv = cv2.threshold(sketch, threshold, 255, cv2.THRESH_BINARY_INV)
-    cv2.imshow('thresh2', thresh2)
+    # cv2.imshow('thresh2', thresh2)
     # cv2.imshow('thresh_inv', thresh_inv)
-    cv2.imshow('img', img)
+    # cv2.imshow('img', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
