@@ -38,7 +38,7 @@ def main():
             break
         if c in gpio_map:
             GPIO.output(gpio_map[c][1], gpio_map[c][2])
-            for i in range(1600):
+            for i in range(800):
                 GPIO.output(gpio_map[c][0], GPIO.HIGH)
                 #print(f'{dir_map[c]}')
                 sleep(0.0005)
