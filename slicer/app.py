@@ -29,7 +29,7 @@ class App(ctk.CTk):
         self.rotation = ctk.DoubleVar(value= 0)
         self.zoom = ctk.DoubleVar(value= 1)
         
-        self.steprate = ctk.IntVar(value=10)
+        self.steprate = ctk.IntVar(value=75)
         self.sliced = ctk.BooleanVar(value=False)
         
         self.canvas_width = 0
@@ -143,18 +143,18 @@ class App(ctk.CTk):
         with open(fp, "w") as f:
             height, width = self.disp_img.shape[:2] 
             for i in range(height):
-                f.write(f"Z0\nX0Y{i}\n")
+                f.write(f"Z0\nX0 Y{i}\n")
                 for j in range(width):
                     if self.disp_img[i][j] == 255:
                         if cur == 0:
-                            f.write(f"X{j}Y{i}\nZ1\n")
+                            f.write(f"X{j} Y{i}\nZ1\n")
                             cur = 1
                     else:
                         if cur == 0:
-                            f.write(f"X{j}Y{i}\nZ0\n")
+                            f.write(f"X{j} Y{i}\nZ0\n")
                             cur = 0
                     if j == width - 1:
-                        f.write(f"X{j}Y{i}\n")
+                        f.write(f"X{j} Y{i}\n")
 
 
     def adj_gamma(self, img, gamma=1):
