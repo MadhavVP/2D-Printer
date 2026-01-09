@@ -3,6 +3,7 @@ import sys
 import tty
 import termios
 from time import sleep
+from constants import gpio_map, gpio_outs, dir_map, allms, penoffset
 
 def getc():
     fd = sys.stdin.fileno()
@@ -15,20 +16,12 @@ def getc():
     return ch
 
 def main():
-    gpio_outs = [17, 27, 22, 23, 2, 3, 4]
-    gpio_map = {'a':[17, 27, GPIO.HIGH], 'd':[17, 27, GPIO.LOW], 'w':[22, 23, GPIO.HIGH], 's':[22, 23, GPIO.LOW]}
-    dir_map = {'a':'left', 'd':'right', 'w':'up', 's':'down'}
-    ms1 = 4
-    ms2 = 3
-    ms3 = 2
 
     GPIO.setmode(GPIO.BCM)
     for x in gpio_outs:
         GPIO.setup(x, GPIO.OUT)
 
-    GPIO.output(ms1, GPIO.HIGH)
-    GPIO.output(ms2, GPIO.HIGH)
-    GPIO.output(ms3, GPIO.HIGH)
+    GPIO.output(allms, GPIO.HIGH)
 
     while True:
         c = getc()
@@ -38,12 +31,17 @@ def main():
             break
         if c in gpio_map:
             GPIO.output(gpio_map[c][1], gpio_map[c][2])
-            for i in range(800):
+            steps = 1000
+            slptime = 0.0005
+            if c == 'u' or c == 'p':
+                steps = penoffset
+                slptime = 0.005
+            for i in range(steps):
                 GPIO.output(gpio_map[c][0], GPIO.HIGH)
-                #print(f'{dir_map[c]}')
-                sleep(0.0005)
+                sleep(slptime)
                 GPIO.output(gpio_map[c][0], GPIO.LOW)
             GPIO.output(gpio_map[c][1], GPIO.LOW)
+            print(f'{dir_map[c]}')
 
 if __name__ == "__main__":
     main()

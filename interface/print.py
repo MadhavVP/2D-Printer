@@ -20,12 +20,9 @@ def main():
                 clean = line.strip()
                 if clean[0] == 'Z':
                     if clean[1] == '0':
-                        #eventually
-                        #head.release()
-                        sleep(0.0001)
+                        head.release()
                     else:
-                        #head.activate()
-                        sleep(0.0001)
+                        head.activate()
                 else:
                     coords = clean.split()
                     x = int(coords[0][1:])

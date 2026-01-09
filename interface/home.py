@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 from time import sleep
-from constants import gpio_outs, gpio_map, ms1, ms2, ms3, xstop, ystop
+from constants import gpio_outs, gpio_map, allms, xstop, ystop
 
 def home():
     offsetsteps = 800
@@ -9,9 +9,7 @@ def home():
     for x in gpio_outs:
         GPIO.setup(x, GPIO.OUT)
 
-    GPIO.output(ms1, GPIO.HIGH)
-    GPIO.output(ms2, GPIO.HIGH)
-    GPIO.output(ms3, GPIO.HIGH)
+    GPIO.output(allms, GPIO.HIGH)
 
     GPIO.setup(xstop, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(ystop, GPIO.IN, pull_up_down=GPIO.PUD_UP)

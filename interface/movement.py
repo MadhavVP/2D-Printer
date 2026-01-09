@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 from time import sleep
 from home import home
-from constants import gpio_outs, gpio_map, ms1, ms2, ms3, stepspeed
+from constants import gpio_outs, gpio_map, allms, stepspeed, penoffset
 
 class Head():
     def __init__(self):
@@ -14,9 +14,7 @@ class Head():
         for x in gpio_outs:
             GPIO.setup(x, GPIO.OUT)
 
-        GPIO.output(ms1, GPIO.HIGH)
-        GPIO.output(ms2, GPIO.HIGH)
-        GPIO.output(ms3, GPIO.HIGH)
+        GPIO.output(allms, GPIO.HIGH)
 
     def move(self, xnext, ynext):
         dx = xnext - self.curx
