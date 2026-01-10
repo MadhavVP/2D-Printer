@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 from time import sleep
 from home import home
-from constants import gpio_outs, gpio_map, allms, stepspeed, penoffset
+from constants import gpio_outs, gpio_map, allms, stepspeed, penoffset, mstepsperstep
 
 class Head():
     def __init__(self):
@@ -36,11 +36,12 @@ class Head():
         self.cury = ynext
 
     def step(self, direction):
-        GPIO.output(gpio_map[direction][1], gpio_map[direction][2])
-        GPIO.output(gpio_map[direction][0], GPIO.HIGH)
-        sleep(stepspeed)
-        GPIO.output(gpio_map[direction][0], GPIO.LOW)
-        GPIO.output(gpio_map[direction][1], GPIO.LOW)
+        for i in range(mstepsperstep):
+            GPIO.output(gpio_map[direction][1], gpio_map[direction][2])
+            GPIO.output(gpio_map[direction][0], GPIO.HIGH)
+            sleep(stepspeed)
+            GPIO.output(gpio_map[direction][0], GPIO.LOW)
+            GPIO.output(gpio_map[direction][1], GPIO.LOW)
 
     def activate(self):
         if not self.pendown:

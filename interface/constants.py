@@ -11,3 +11,4 @@ xstop = 21
 ystop = 20
 stepspeed = 0.00005
 penoffset = 96
+mstepsperstep = 10
