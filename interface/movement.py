@@ -21,8 +21,7 @@ class Head():
         dirx = 'a'
         if dx < 0:
             dirx = 'd'
-        for i in range(abs(dx)):
-            self.step(dirx)
+        self.step(dirx, abs(dx) * mstepsperstep)
 
         self.curx = xnext
         
@@ -30,13 +29,12 @@ class Head():
         dy = ynext - self.cury
         if dy < 0:
             diry = 's'
-        for i in range(abs(dy)):
-            self.step(diry)
+        self.step(diry, abs(dy) * mstepsperstep)
 
         self.cury = ynext
 
-    def step(self, direction):
-        for i in range(mstepsperstep):
+    def step(self, direction, numsteps):
+        for i in range(numsteps):
             GPIO.output(gpio_map[direction][1], gpio_map[direction][2])
             GPIO.output(gpio_map[direction][0], GPIO.HIGH)
             sleep(stepspeed)
@@ -45,14 +43,12 @@ class Head():
 
     def activate(self):
         if not self.pendown:
-            for i in range(penoffset):
-                self.step('p')
+                self.step('p', penoffset)
         self.pendown = True
 
     def release(self):
         if self.pendown:
-            for i in range(penoffset):
-                self.step('u')
+                self.step('u', penoffset)
         self.pendown = False
 
     def close(self):
