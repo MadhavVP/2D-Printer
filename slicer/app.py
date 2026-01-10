@@ -150,7 +150,7 @@ class App(ctk.CTk):
                             f.write(f"X{j} Y{i}\nZ1\n")
                             cur = 1
                     else:
-                        if cur == 0:
+                        if cur == 1:
                             f.write(f"X{j} Y{i}\nZ0\n")
                             cur = 0
                     if j == width - 1:
