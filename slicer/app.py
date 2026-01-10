@@ -105,6 +105,13 @@ class App(ctk.CTk):
         paper = np.full((ph, pw), 255, dtype=np.uint8)
 
         imgh, imgw = self.cv2_img.shape[:2]
+
+        if self.rotation.get() == 0 and self.zoom.get() == 1:
+            paper[:] = 255
+            y = (ph - imgh) // 2
+            x = (pw - imgw) // 2
+            paper[y:y+imgh, x:x+imgw] = self.cv2_img
+            return paper
         
         paper_center = (pw // 2, ph // 2)
         img_center = (imgw // 2, imgh // 2)
