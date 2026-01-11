@@ -5,19 +5,18 @@ class Menu(ctk.CTkTabview):
         pencilksize,
         dgksize,
         gamma, rotation, zoom,
-        steprate, sliced, exportfunc):
+        steprate, sliced, exportfunc, linefollowing):
         super().__init__(master=parent)
         self.grid(row=0, column=0, sticky='nsew')
 
         self.add('Prepare')
         self.add('Slice')
-        self.add('Export')
 
         PrepareFrame(self.tab('Prepare'), paperh, paperw, preptext, prepvars, thresh, sobelksize,
         pencilksize,
         dgksize,
         gamma, rotation, zoom)
-        SliceFrame(self.tab('Slice'), steprate, sliced, exportfunc)
+        SliceFrame(self.tab('Slice'), steprate, sliced, exportfunc, linefollowing)
 
 class PrepareFrame(ctk.CTkFrame):
     def __init__(self, parent, pheight, pwidth, textargs, varargs, threshvar, sobelksize,
@@ -40,10 +39,11 @@ class PrepareFrame(ctk.CTkFrame):
 
 
 class SliceFrame(ctk.CTkFrame):
-    def __init__(self, parent, steprate, sliced, exportfunc):
+    def __init__(self, parent, steprate, sliced, exportfunc, linefollowing):
         super().__init__(master=parent, fg_color=TERTIARY)
         self.pack(expand=True, fill='both')
 
         FillIn(self, 'Steps per mm', steprate)
+        Checkbox(self, ['DFS/Line Following'], [linefollowing])
         ctk.CTkButton(self, command=sliced, text='Slice').pack(fill='both', padx=5,pady=5)
         ctk.CTkButton(self, command=exportfunc, text='Export').pack(fill='both', padx=5,pady=5)

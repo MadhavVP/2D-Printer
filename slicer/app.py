@@ -6,6 +6,7 @@ from settings import *
 import cv2
 import numpy as np
 from tkinter import filedialog
+import sys 
 
 class App(ctk.CTk):
     def __init__(self):
@@ -31,6 +32,7 @@ class App(ctk.CTk):
         self.zoom = ctk.DoubleVar(value= 1)
         
         self.steprate = ctk.IntVar(value=75)
+        self.linefollowing = ctk.BooleanVar(value=False)
         self.sliced = ctk.BooleanVar(value=False)
         
         self.canvas_width = 0
@@ -71,7 +73,8 @@ class App(ctk.CTk):
         self.zoom,
         self.steprate,
         self.disp_sliced,
-        self.export)
+        self.export,
+        self.linefollowing)
         self.reload_cv2_img()
     
     def reload_cv2_img(self):
@@ -153,19 +156,56 @@ class App(ctk.CTk):
         cur = 0
         with open(fp, "w") as f:
             height, width = self.disp_img.shape[:2] 
-            for i in range(height):
-                f.write(f"Z0\nX0 Y{i}\n")
-                for j in range(width):
-                    if self.disp_img[i][j] == 0:
-                        if cur == 0:
-                            f.write(f"X{j} Y{i}\nZ1\n")
-                            cur = 1
-                    else:
-                        if cur == 1:
-                            f.write(f"X{j} Y{i}\nZ0\n")
-                            cur = 0
-                    if j == width - 1:
-                        f.write(f"X{j} Y{i}\n")
+            if self.linefollowing.get():
+                sys.setrecursionlimit(10000)
+                visited =  np.zeros((height, width), dtype=int)
+                for i in range(height):
+                    for j in range(width):
+                        self.dfswrite(self.disp_img, f, i, j, visited)
+            else: 
+                for i in range(height):
+                    f.write(f"Z0\nX0 Y{i}\n")
+                    for j in range(width):
+                        if self.disp_img[i][j] == 0:
+                            if cur == 0:
+                                f.write(f"X{j} Y{i}\nZ1\n")
+                                cur = 1
+                        else:
+                            if cur == 1:
+                                f.write(f"X{j} Y{i}\nZ0\n")
+                                cur = 0
+                        if j == width - 1:
+                            f.write(f"X{j} Y{i}\n")
+    
+    def dfswrite(self, img, f, i, j, visited):
+        if visited[i][j]:
+            return
+        visited[i][j] = 1
+        if img[i][j] != 0:
+            return
+        
+        f.write(f"X{j} Y{i}\nZ1\n")
+        height, width = visited.shape[:2] 
+        if i + 1 < height:
+            self.dfswrite(img, f, i + 1, j, visited)
+            f.write(f"X{j} Y{i}\nZ1\n")
+
+        if j + 1 < width:
+            self.dfswrite(img, f, i, j + 1, visited)
+            f.write(f"X{j} Y{i}\nZ1\n")
+
+        if i - 1 >= 0:
+            self.dfswrite(img, f, i - 1, j, visited)
+            f.write(f"X{j} Y{i}\nZ1\n")
+
+        if j - 1 >= 0:
+            self.dfswrite(img, f, i, j - 1, visited)
+            f.write(f"X{j} Y{i}\nZ1\n")
+        f.write("Z0\n")
+
+        
+
+
 
 
     def adj_gamma(self, img, gamma=1):
