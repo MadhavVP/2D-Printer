@@ -157,7 +157,7 @@ class App(ctk.CTk):
         with open(fp, "w") as f:
             height, width = self.disp_img.shape[:2] 
             if self.linefollowing.get():
-                sys.setrecursionlimit(10000)
+                sys.setrecursionlimit(100000)
                 visited =  np.zeros((height, width), dtype=int)
                 for i in range(height):
                     for j in range(width):
