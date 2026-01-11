@@ -162,6 +162,8 @@ class App(ctk.CTk):
                 for i in range(height):
                     for j in range(width):
                         self.dfswrite(self.disp_img, f, i, j, visited)
+                        f.write("Z0\n")
+
             else: 
                 for i in range(height):
                     f.write(f"Z0\nX0 Y{i}\n")
@@ -201,7 +203,6 @@ class App(ctk.CTk):
         if j - 1 >= 0:
             self.dfswrite(img, f, i, j - 1, visited)
             f.write(f"X{j} Y{i}\nZ1\n")
-        f.write("Z0\n")
 
         
 
